@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -6,6 +7,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: const MyHomePage(title: 'Im currently learning Flutter!'),
+      home: const MyHomePage(title: 'Tic Tac Toe Game'),
     );
   }
 }
@@ -28,45 +30,151 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      if (_counter == 10) {
-        _counter = 0;
-      } else {
-        _counter++;
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        centerTitle: true,
         backgroundColor: Colors.black,
+      ),
+      drawer: Drawer(
+        child: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              ListTile(
+                horizontalTitleGap: 0,
+                leading: Image.asset('assets/images/Github.png', width: 30),
+                title: const Text('GitHub'),
+                onTap: () => _launchUrl('https://github.com/PotatOn240HZz'),
+              ),
+              ListTile(
+                horizontalTitleGap: 0,
+                leading: Image.asset('assets/images/Linkedin.png', width: 30),
+                title: const Text('LinkedIn'),
+                onTap: () =>
+                    _launchUrl('https://www.linkedin.com/in/yousefshaban/'),
+              ),
+            ],
+          ),
+        ),
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                ),
+                itemCount: 9,
+                itemBuilder: (BuildContext context, int index) {
+                  return GridTile(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: _determineBorder(index),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          // mylist[index],
+                          'X',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 55),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const Expanded(child: SizedBox()),
             const Text(
-              'You have pushed the button this many times:',
+              'Score',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Column(children: const [
+                      Text(
+                        'Player X',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      Text(
+                        '0',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ]),
+                    Column(children: const [
+                      Text(
+                        'Player O',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      Text(
+                        '0',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ]),
+                  ]),
+            )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        backgroundColor: Colors.blueAccent,
-        child: const Icon(Icons.add),
-      ),
     );
+  }
+
+  Border _determineBorder(int index) {
+    BorderSide borderSide = const BorderSide(
+      color: Colors.grey,
+      width: 1.5,
+    );
+    switch (index) {
+      case 0:
+        return Border(bottom: borderSide, right: borderSide);
+
+      case 1:
+        return Border(left: borderSide, bottom: borderSide, right: borderSide);
+
+      case 2:
+        return Border(left: borderSide, bottom: borderSide);
+
+      case 3:
+        return Border(bottom: borderSide, right: borderSide, top: borderSide);
+
+      case 4:
+        return Border(
+          left: borderSide,
+          bottom: borderSide,
+          right: borderSide,
+          top: borderSide,
+        );
+      case 5:
+        return Border(left: borderSide, bottom: borderSide, top: borderSide);
+
+      case 6:
+        return Border(right: borderSide, top: borderSide);
+
+      case 7:
+        return Border(left: borderSide, top: borderSide, right: borderSide);
+
+      case 8:
+        return Border(left: borderSide, top: borderSide);
+      default:
+        return const Border();
+    }
+  }
+
+  Future<void> _launchUrl(String url) async {
+    Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      throw 'Could not launch $uri';
+    }
   }
 }
