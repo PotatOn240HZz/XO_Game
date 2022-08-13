@@ -30,6 +30,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List<String> myList = List.filled(9, '');
+  bool isXTurn = true;
+  bool xWon = false;
+  bool oWon = false;
+  int xWins = 0;
+  int oWins = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -73,18 +79,30 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 itemCount: 9,
                 itemBuilder: (BuildContext context, int index) {
-                  return GridTile(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: _determineBorder(index),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          // mylist[index],
-                          'X',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 55),
-                          textAlign: TextAlign.center,
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (myList[index] == '' && (!xWon && !oWon)) {
+                          myList[index] = isXTurn ? 'X' : 'O';
+                          isXTurn = !isXTurn;
+                          if (checkWinner(index + 1)) {
+                            print("THERE IS A WINNER");
+                          }
+                        }
+                      });
+                    },
+                    child: GridTile(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: _determineBorder(index),
+                        ),
+                        child: Center(
+                          child: Text(
+                            myList[index],
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 55),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
                     ),
@@ -102,23 +120,23 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Column(children: const [
-                      Text(
+                    Column(children: [
+                      const Text(
                         'Player X',
                         style: TextStyle(fontSize: 20),
                       ),
                       Text(
-                        '0',
+                        xWins.toString(),
                         style: TextStyle(fontSize: 20),
                       ),
                     ]),
-                    Column(children: const [
-                      Text(
+                    Column(children: [
+                      const Text(
                         'Player O',
                         style: TextStyle(fontSize: 20),
                       ),
                       Text(
-                        '0',
+                        oWins.toString(),
                         style: TextStyle(fontSize: 20),
                       ),
                     ]),
@@ -128,6 +146,106 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  int row1Num = 0;
+  int row2Num = 0;
+  int row3Num = 0;
+  int column1Num = 0;
+  int column2Num = 0;
+  int column3Num = 0;
+  int diagonalNum = 0;
+  int rDiagonalNum = 0;
+
+  bool checkWinner(int i) {
+    //ADD ALL
+    switch (i) {
+      case 1:
+        myList[i - 1] == 'X' ? row1Num++ : row1Num--;
+        myList[i - 1] == 'X' ? column1Num++ : column1Num--;
+        myList[i - 1] == 'X' ? diagonalNum++ : diagonalNum--;
+        break;
+      case 2:
+        myList[i - 1] == 'X' ? row1Num++ : row1Num--;
+        myList[i - 1] == 'X' ? column2Num++ : column2Num--;
+        break;
+      case 3:
+        myList[i - 1] == 'X' ? row1Num++ : row1Num--;
+        myList[i - 1] == 'X' ? column3Num++ : column3Num--;
+        myList[i - 1] == 'X' ? rDiagonalNum++ : rDiagonalNum--;
+        break;
+      case 4:
+        myList[i - 1] == 'X' ? row2Num++ : row2Num--;
+        myList[i - 1] == 'X' ? column1Num++ : column1Num--;
+        break;
+      case 5:
+        myList[i - 1] == 'X' ? row2Num++ : row2Num--;
+        myList[i - 1] == 'X' ? column2Num++ : column2Num--;
+        myList[i - 1] == 'X' ? diagonalNum++ : diagonalNum--;
+        myList[i - 1] == 'X' ? rDiagonalNum++ : rDiagonalNum--;
+        break;
+      case 6:
+        myList[i - 1] == 'X' ? row2Num++ : row2Num--;
+        myList[i - 1] == 'X' ? column3Num++ : column3Num--;
+        break;
+      case 7:
+        myList[i - 1] == 'X' ? row3Num++ : row3Num--;
+        myList[i - 1] == 'X' ? column1Num++ : column1Num--;
+        myList[i - 1] == 'X' ? rDiagonalNum++ : rDiagonalNum--;
+        break;
+      case 8:
+        myList[i - 1] == 'X' ? row3Num++ : row3Num--;
+        myList[i - 1] == 'X' ? column2Num++ : column2Num--;
+        break;
+      case 9:
+        myList[i - 1] == 'X' ? row3Num++ : row3Num--;
+        myList[i - 1] == 'X' ? column3Num++ : column3Num--;
+        myList[i - 1] == 'X' ? diagonalNum++ : diagonalNum--;
+        break;
+    }
+    //CHECK ALL
+    //CHECK ROW
+    if (row1Num == 3 || row1Num == -3) {
+      row1Num == 3 ? xWon = true : oWon = true;
+      row1Num == 3 ? xWins++ : oWins++;
+      return true;
+    } else if (row2Num == 3 || row2Num == -3) {
+      row2Num == 3 ? xWon = true : oWon = true;
+      row2Num == 3 ? xWins++ : oWins++;
+      return true;
+    } else if (row3Num == 3 || row3Num == -3) {
+      row3Num == 3 ? xWon = true : oWon = true;
+      row3Num == 3 ? xWins++ : oWins++;
+      return true;
+    }
+    //CHECK COLUMN
+    else if (column1Num == 3 || column1Num == -3) {
+      column1Num == 3 ? xWon = true : oWon = true;
+      column1Num == 3 ? xWins++ : oWins++;
+      return true;
+    } else if (column2Num == 3 || column2Num == -3) {
+      column2Num == 3 ? xWon = true : oWon = true;
+      column2Num == 3 ? xWins++ : oWins++;
+      return true;
+    } else if (column3Num == 3 || column3Num == -3) {
+      column3Num == 3 ? xWon = true : oWon = true;
+      column3Num == 3 ? xWins++ : oWins++;
+      return true;
+    }
+    //CHECK Diagonal
+    else if (diagonalNum == 3 || diagonalNum == -3) {
+      diagonalNum == 3 ? xWon = true : oWon = true;
+      diagonalNum == 3 ? xWins++ : oWins++;
+      return true;
+    }
+    //CHECK ReverseDiagonal
+    else if (rDiagonalNum == 3 || rDiagonalNum == -3) {
+      rDiagonalNum == 3 ? xWon = true : oWon = true;
+      rDiagonalNum == 3 ? xWins++ : oWins++;
+      return true;
+    }
+    //ELSE ALL NOT TRUE
+    return false;
   }
 
   Border _determineBorder(int index) {
