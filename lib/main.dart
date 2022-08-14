@@ -31,6 +31,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<String> myList = List.filled(9, '');
+  List<Color> myListColour = List.filled(9, Colors.white);
   bool isXTurn = true;
   bool xWon = false;
   bool oWon = false;
@@ -95,13 +96,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Container(
                         decoration: BoxDecoration(
                           border: _determineBorder(index),
+                          color: myListColour[index],
                         ),
                         child: Center(
                           child: Text(
                             myList[index],
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 55),
-                            textAlign: TextAlign.center,
+                                textAlign: TextAlign.center,
                           ),
                         ),
                       ),
@@ -127,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       Text(
                         xWins.toString(),
-                        style: TextStyle(fontSize: 20),
+                        style: const TextStyle(fontSize: 20),
                       ),
                     ]),
                     Column(children: [
@@ -137,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       Text(
                         oWins.toString(),
-                        style: TextStyle(fontSize: 20),
+                        style: const TextStyle(fontSize: 20),
                       ),
                     ]),
                   ]),
@@ -203,49 +205,72 @@ class _MyHomePageState extends State<MyHomePage> {
         myList[i - 1] == 'X' ? diagonalNum++ : diagonalNum--;
         break;
     }
+
     //CHECK ALL
     //CHECK ROW
     if (row1Num == 3 || row1Num == -3) {
-      row1Num == 3 ? xWon = true : oWon = true;
-      row1Num == 3 ? xWins++ : oWins++;
-      return true;
+      return applyWinner(row1Num, 1);
     } else if (row2Num == 3 || row2Num == -3) {
-      row2Num == 3 ? xWon = true : oWon = true;
-      row2Num == 3 ? xWins++ : oWins++;
-      return true;
+      return applyWinner(row2Num, 2);
     } else if (row3Num == 3 || row3Num == -3) {
-      row3Num == 3 ? xWon = true : oWon = true;
-      row3Num == 3 ? xWins++ : oWins++;
-      return true;
+      return applyWinner(row3Num, 3);
     }
     //CHECK COLUMN
     else if (column1Num == 3 || column1Num == -3) {
-      column1Num == 3 ? xWon = true : oWon = true;
-      column1Num == 3 ? xWins++ : oWins++;
-      return true;
+      return applyWinner(column1Num, 4);
     } else if (column2Num == 3 || column2Num == -3) {
-      column2Num == 3 ? xWon = true : oWon = true;
-      column2Num == 3 ? xWins++ : oWins++;
-      return true;
+      return applyWinner(column2Num, 5);
     } else if (column3Num == 3 || column3Num == -3) {
-      column3Num == 3 ? xWon = true : oWon = true;
-      column3Num == 3 ? xWins++ : oWins++;
-      return true;
+      return applyWinner(column3Num, 6);
     }
     //CHECK Diagonal
     else if (diagonalNum == 3 || diagonalNum == -3) {
-      diagonalNum == 3 ? xWon = true : oWon = true;
-      diagonalNum == 3 ? xWins++ : oWins++;
-      return true;
+      return applyWinner(diagonalNum, 7);
     }
     //CHECK ReverseDiagonal
     else if (rDiagonalNum == 3 || rDiagonalNum == -3) {
-      rDiagonalNum == 3 ? xWon = true : oWon = true;
-      rDiagonalNum == 3 ? xWins++ : oWins++;
-      return true;
+      return applyWinner(rDiagonalNum, 8);
     }
-    //ELSE ALL NOT TRUE
+    //NONE WON YET
     return false;
+  }
+
+  bool applyWinner(int numberOfSymbol, int line) {
+    if (numberOfSymbol == 3) {
+      xWon = true;
+      xWins++;
+    } else {
+      oWon = true;
+      oWins++;
+    }
+    //CHANGE THE COLOUR OF THE WINNER
+    switch (line) {
+      case 1:
+      case 2:
+      case 3:
+        for (int i = (line * 3) - 3; i < line * 3; i++) {
+          myListColour[i]=Colors.red;
+        }
+        break;
+      case 4:
+      case 5:
+      case 6:
+        for(int i = line-4; i < 9; i+=3){
+          myListColour[i]=Colors.red;
+        }
+        break;
+      case 7:
+        for(int i=0;i<9;i+=4){
+          myListColour[i]=Colors.red;
+        }
+        break;
+      case 8:
+        for(int i=2;i<7;i+=2){
+          myListColour[i]=Colors.red;
+        }
+        break;
+    }
+    return true;
   }
 
   Border _determineBorder(int index) {
