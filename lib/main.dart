@@ -30,13 +30,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> myList = List.filled(9, '');
-  List<Color> myListColour = List.filled(9, Colors.white);
+  List<String> gridComponents = List.filled(9, '');
+  List<Color> gridColour = List.filled(9, Colors.white);
   bool isXTurn = true;
-  bool xWon = false;
-  bool oWon = false;
   int xWins = 0;
   int oWins = 0;
+  bool someoneWon = false;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 35, 20, 0),
               child: GridView.builder(
                 shrinkWrap: true,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -83,8 +82,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   return GestureDetector(
                     onTap: () {
                       setState(() {
-                        if (myList[index] == '' && (!xWon && !oWon)) {
-                          myList[index] = isXTurn ? 'X' : 'O';
+                        if (gridComponents[index] == '' && !someoneWon) {
+                          gridComponents[index] = isXTurn ? 'X' : 'O';
                           isXTurn = !isXTurn;
                           if (checkWinner(index + 1)) {
                             print("THERE IS A WINNER");
@@ -96,14 +95,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Container(
                         decoration: BoxDecoration(
                           border: _determineBorder(index),
-                          color: myListColour[index],
+                          color: gridColour[index],
                         ),
                         child: Center(
                           child: Text(
-                            myList[index],
+                            gridComponents[index],
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 55),
-                                textAlign: TextAlign.center,
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
@@ -113,12 +112,24 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const Expanded(child: SizedBox()),
-            const Text(
-              'Score',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+            ElevatedButton(
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: const BorderSide(color: Colors.grey))),
+                backgroundColor: MaterialStateProperty.all(Colors.grey),
+                textStyle: MaterialStateProperty.all(
+                  const TextStyle(fontSize: 30),
+                ),
+              ),
+              onPressed: () {
+                showResetDialog(context);
+              },
+              child: const Text("Reset"),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.only(bottom: 35),
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -150,123 +161,190 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  int row1Num = 0;
-  int row2Num = 0;
-  int row3Num = 0;
-  int column1Num = 0;
-  int column2Num = 0;
-  int column3Num = 0;
-  int diagonalNum = 0;
-  int rDiagonalNum = 0;
+  void reset() {
+    setState(() {
+      xWins = 0;
+      oWins = 0;
+      isXTurn = true;
+      someoneWon = false;
+      for (int i = 0; i < 9; i++) {
+        gridComponents[i] = '';
+        gridColour[i] = Colors.white;
+        if (i != 8) {
+          winningPattern[i] = 0;
+        }
+      }
+    });
+  }
+
+  //1st winning pattern will be the 1st row
+  //2nd winning pattern will be the 2st row
+  //3rd winning pattern will be the 3st row
+  //4th winning pattern will be the 1st column
+  //5th winning pattern will be the 2st column
+  //6th winning pattern will be the 3st column
+  //7th winning pattern will be the diagonal
+  //8th winning pattern will be the diagonal
+  List<int> winningPattern = List.filled(8, 0);
 
   bool checkWinner(int i) {
     //ADD ALL
     switch (i) {
       case 1:
-        myList[i - 1] == 'X' ? row1Num++ : row1Num--;
-        myList[i - 1] == 'X' ? column1Num++ : column1Num--;
-        myList[i - 1] == 'X' ? diagonalNum++ : diagonalNum--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[0]++
+            : winningPattern[0]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[3]++
+            : winningPattern[3]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[6]++
+            : winningPattern[6]--;
         break;
       case 2:
-        myList[i - 1] == 'X' ? row1Num++ : row1Num--;
-        myList[i - 1] == 'X' ? column2Num++ : column2Num--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[0]++
+            : winningPattern[0]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[4]++
+            : winningPattern[4]--;
         break;
       case 3:
-        myList[i - 1] == 'X' ? row1Num++ : row1Num--;
-        myList[i - 1] == 'X' ? column3Num++ : column3Num--;
-        myList[i - 1] == 'X' ? rDiagonalNum++ : rDiagonalNum--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[0]++
+            : winningPattern[0]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[5]++
+            : winningPattern[5]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[7]++
+            : winningPattern[7]--;
         break;
       case 4:
-        myList[i - 1] == 'X' ? row2Num++ : row2Num--;
-        myList[i - 1] == 'X' ? column1Num++ : column1Num--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[1]++
+            : winningPattern[1]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[3]++
+            : winningPattern[3]--;
         break;
       case 5:
-        myList[i - 1] == 'X' ? row2Num++ : row2Num--;
-        myList[i - 1] == 'X' ? column2Num++ : column2Num--;
-        myList[i - 1] == 'X' ? diagonalNum++ : diagonalNum--;
-        myList[i - 1] == 'X' ? rDiagonalNum++ : rDiagonalNum--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[1]++
+            : winningPattern[1]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[4]++
+            : winningPattern[4]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[6]++
+            : winningPattern[6]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[7]++
+            : winningPattern[7]--;
         break;
       case 6:
-        myList[i - 1] == 'X' ? row2Num++ : row2Num--;
-        myList[i - 1] == 'X' ? column3Num++ : column3Num--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[1]++
+            : winningPattern[1]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[5]++
+            : winningPattern[5]--;
         break;
       case 7:
-        myList[i - 1] == 'X' ? row3Num++ : row3Num--;
-        myList[i - 1] == 'X' ? column1Num++ : column1Num--;
-        myList[i - 1] == 'X' ? rDiagonalNum++ : rDiagonalNum--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[2]++
+            : winningPattern[2]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[3]++
+            : winningPattern[3]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[7]++
+            : winningPattern[7]--;
         break;
       case 8:
-        myList[i - 1] == 'X' ? row3Num++ : row3Num--;
-        myList[i - 1] == 'X' ? column2Num++ : column2Num--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[2]++
+            : winningPattern[2]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[4]++
+            : winningPattern[4]--;
         break;
       case 9:
-        myList[i - 1] == 'X' ? row3Num++ : row3Num--;
-        myList[i - 1] == 'X' ? column3Num++ : column3Num--;
-        myList[i - 1] == 'X' ? diagonalNum++ : diagonalNum--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[2]++
+            : winningPattern[2]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[5]++
+            : winningPattern[5]--;
+        gridComponents[i - 1] == 'X'
+            ? winningPattern[6]++
+            : winningPattern[6]--;
         break;
     }
 
     //CHECK ALL
     //CHECK ROW
-    if (row1Num == 3 || row1Num == -3) {
-      return applyWinner(row1Num, 1);
-    } else if (row2Num == 3 || row2Num == -3) {
-      return applyWinner(row2Num, 2);
-    } else if (row3Num == 3 || row3Num == -3) {
-      return applyWinner(row3Num, 3);
+    if (winningPattern[0] == 3 || winningPattern[0] == -3) {
+      return applyWinner(winningPattern[0], 1);
+    } else if (winningPattern[1] == 3 || winningPattern[1] == -3) {
+      return applyWinner(winningPattern[1], 2);
+    } else if (winningPattern[2] == 3 || winningPattern[2] == -3) {
+      return applyWinner(winningPattern[2], 3);
     }
     //CHECK COLUMN
-    else if (column1Num == 3 || column1Num == -3) {
-      return applyWinner(column1Num, 4);
-    } else if (column2Num == 3 || column2Num == -3) {
-      return applyWinner(column2Num, 5);
-    } else if (column3Num == 3 || column3Num == -3) {
-      return applyWinner(column3Num, 6);
+    else if (winningPattern[3] == 3 || winningPattern[3] == -3) {
+      return applyWinner(winningPattern[3], 4);
+    } else if (winningPattern[4] == 3 || winningPattern[4] == -3) {
+      return applyWinner(winningPattern[4], 5);
+    } else if (winningPattern[5] == 3 || winningPattern[5] == -3) {
+      return applyWinner(winningPattern[5], 6);
     }
-    //CHECK Diagonal
-    else if (diagonalNum == 3 || diagonalNum == -3) {
-      return applyWinner(diagonalNum, 7);
+    //CHECK Diagonal`
+    else if (winningPattern[6] == 3 || winningPattern[6] == -3) {
+      return applyWinner(winningPattern[6], 7);
     }
     //CHECK ReverseDiagonal
-    else if (rDiagonalNum == 3 || rDiagonalNum == -3) {
-      return applyWinner(rDiagonalNum, 8);
+    else if (winningPattern[7] == 3 || winningPattern[7] == -3) {
+      return applyWinner(winningPattern[7], 8);
     }
     //NONE WON YET
     return false;
   }
 
   bool applyWinner(int numberOfSymbol, int line) {
+    someoneWon = true;
     if (numberOfSymbol == 3) {
-      xWon = true;
       xWins++;
+      showWinningDialog(context, true);
     } else {
-      oWon = true;
       oWins++;
+      showWinningDialog(context, false);
     }
+
     //CHANGE THE COLOUR OF THE WINNER
     switch (line) {
       case 1:
       case 2:
       case 3:
         for (int i = (line * 3) - 3; i < line * 3; i++) {
-          myListColour[i]=Colors.red;
+          gridColour[i] = Colors.red;
         }
         break;
       case 4:
       case 5:
       case 6:
-        for(int i = line-4; i < 9; i+=3){
-          myListColour[i]=Colors.red;
+        for (int i = line - 4; i < 9; i += 3) {
+          gridColour[i] = Colors.red;
         }
         break;
       case 7:
-        for(int i=0;i<9;i+=4){
-          myListColour[i]=Colors.red;
+        for (int i = 0; i < 9; i += 4) {
+          gridColour[i] = Colors.red;
         }
         break;
       case 8:
-        for(int i=2;i<7;i+=2){
-          myListColour[i]=Colors.red;
+        for (int i = 2; i < 7; i += 2) {
+          gridColour[i] = Colors.red;
         }
         break;
     }
@@ -312,6 +390,78 @@ class _MyHomePageState extends State<MyHomePage> {
       default:
         return const Border();
     }
+  }
+
+  showWinningDialog(BuildContext context, bool didXWin) {
+    // set up the AlertDialog
+    String alertTitle;
+    String alertContent;
+    if (didXWin == true) {
+      alertTitle = "X Won!";
+      alertContent = "Your score is now:$xWins";
+    } else {
+      alertTitle = "O Won!";
+      alertContent = "Your score is now:$oWins";
+    }
+
+    // set up the button
+    Widget okButton = TextButton(
+      child: const Text("OK"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text(alertTitle),
+      content: Text(alertContent),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showResetDialog(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: const Text("Cancel"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+    Widget continueButton = TextButton(
+      child: const Text("Reset"),
+      onPressed: () {
+        reset();
+        Navigator.of(context).pop();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text("AlertDialog"),
+      content: const Text("You sure you want to reset the game?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   Future<void> _launchUrl(String url) async {
