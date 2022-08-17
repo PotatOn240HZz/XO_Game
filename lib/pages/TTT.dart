@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TTT extends StatefulWidget {
-  const TTT({Key? key}) : super(key: key);
+  const TTT({Key? key,required this.isAI}) : super(key: key);
+
+  final bool isAI;
 
   @override
   State<TTT> createState() => _TTTState();
@@ -15,6 +17,7 @@ class _TTTState extends State<TTT> {
   int xWins = 0;
   int oWins = 0;
   bool someoneWon = false;
+  String tttButton = "it's X turn!";
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +29,9 @@ class _TTTState extends State<TTT> {
           backgroundColor: Colors.black,
           actions: [
             IconButton(
-              icon: const Icon(Icons.home, size: 28),
+              icon: const Icon(Icons.restart_alt, size: 28),
               onPressed: () {
-                showResetAndHomepageDialog(context, false);
+                showResetAndHomepageDialog(context, true);
               },
             ),
           ],
@@ -38,6 +41,22 @@ class _TTTState extends State<TTT> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
+                ListTile(
+                  horizontalTitleGap: 0,
+                  title: const Text('Get Back To Home Screen'),
+                  onTap: () => {
+                    Navigator.of(context).pop(),
+                    showResetAndHomepageDialog(context, false),
+                  },
+                ),
+                ListTile(
+                  horizontalTitleGap: 0,
+                  title: const Text('Reset Score'),
+                  onTap: () => {
+                    Navigator.of(context).pop(),
+                    showResetAndHomepageDialog(context, true),
+                  },
+                ),
                 ListTile(
                   horizontalTitleGap: 0,
                   leading: Image.asset('assets/images/Github.png', width: 30),
@@ -73,7 +92,14 @@ class _TTTState extends State<TTT> {
                           if (gridComponents[index] == '' && !someoneWon) {
                             gridComponents[index] = isXTurn ? 'X' : 'O';
                             isXTurn = !isXTurn;
-                            checkWinner(index + 1);
+                            if (isXTurn) {
+                              tttButton = "it's X turn!";
+                            } else {
+                              tttButton = "it's O turn!";
+                            }
+                            if (checkWinner(index + 1)) {
+                              tttButton = "Play Again";
+                            }
                           }
                         });
                       },
@@ -110,9 +136,11 @@ class _TTTState extends State<TTT> {
                   ),
                 ),
                 onPressed: () {
-                  showResetAndHomepageDialog(context, true);
+                  if (someoneWon) {
+                    reset();
+                  }
                 },
-                child: const Text("Reset"),
+                child: Text(tttButton),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 35),
@@ -148,12 +176,19 @@ class _TTTState extends State<TTT> {
     );
   }
 
-  void reset() {
+  void scoreReset() {
     setState(() {
       xWins = 0;
       oWins = 0;
+    });
+    reset();
+  }
+
+  void reset() {
+    setState(() {
       isXTurn = true;
       someoneWon = false;
+      tttButton = "it's X turn!";
       for (int i = 0; i < 9; i++) {
         gridComponents[i] = '';
         gridColour[i] = Colors.white;
@@ -174,98 +209,51 @@ class _TTTState extends State<TTT> {
   //8th winning pattern will be the diagonal
 
   List<int> patternSum = List.filled(8, 0);
+
   bool checkWinner(int i) {
     //ADD ALL
     switch (i) {
       case 1:
-        gridComponents[i - 1] == 'X'
-            ? patternSum[0]++
-            : patternSum[0]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[3]++
-            : patternSum[3]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[6]++
-            : patternSum[6]--;
+        gridComponents[i - 1] == 'X' ? patternSum[0]++ : patternSum[0]--;
+        gridComponents[i - 1] == 'X' ? patternSum[3]++ : patternSum[3]--;
+        gridComponents[i - 1] == 'X' ? patternSum[6]++ : patternSum[6]--;
         break;
       case 2:
-        gridComponents[i - 1] == 'X'
-            ? patternSum[0]++
-            : patternSum[0]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[4]++
-            : patternSum[4]--;
+        gridComponents[i - 1] == 'X' ? patternSum[0]++ : patternSum[0]--;
+        gridComponents[i - 1] == 'X' ? patternSum[4]++ : patternSum[4]--;
         break;
       case 3:
-        gridComponents[i - 1] == 'X'
-            ? patternSum[0]++
-            : patternSum[0]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[5]++
-            : patternSum[5]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[7]++
-            : patternSum[7]--;
+        gridComponents[i - 1] == 'X' ? patternSum[0]++ : patternSum[0]--;
+        gridComponents[i - 1] == 'X' ? patternSum[5]++ : patternSum[5]--;
+        gridComponents[i - 1] == 'X' ? patternSum[7]++ : patternSum[7]--;
         break;
       case 4:
-        gridComponents[i - 1] == 'X'
-            ? patternSum[1]++
-            : patternSum[1]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[3]++
-            : patternSum[3]--;
+        gridComponents[i - 1] == 'X' ? patternSum[1]++ : patternSum[1]--;
+        gridComponents[i - 1] == 'X' ? patternSum[3]++ : patternSum[3]--;
         break;
       case 5:
-        gridComponents[i - 1] == 'X'
-            ? patternSum[1]++
-            : patternSum[1]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[4]++
-            : patternSum[4]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[6]++
-            : patternSum[6]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[7]++
-            : patternSum[7]--;
+        gridComponents[i - 1] == 'X' ? patternSum[1]++ : patternSum[1]--;
+        gridComponents[i - 1] == 'X' ? patternSum[4]++ : patternSum[4]--;
+        gridComponents[i - 1] == 'X' ? patternSum[6]++ : patternSum[6]--;
+        gridComponents[i - 1] == 'X' ? patternSum[7]++ : patternSum[7]--;
         break;
       case 6:
-        gridComponents[i - 1] == 'X'
-            ? patternSum[1]++
-            : patternSum[1]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[5]++
-            : patternSum[5]--;
+        gridComponents[i - 1] == 'X' ? patternSum[1]++ : patternSum[1]--;
+        gridComponents[i - 1] == 'X' ? patternSum[5]++ : patternSum[5]--;
         break;
       case 7:
-        gridComponents[i - 1] == 'X'
-            ? patternSum[2]++
-            : patternSum[2]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[3]++
-            : patternSum[3]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[7]++
-            : patternSum[7]--;
+        gridComponents[i - 1] == 'X' ? patternSum[2]++ : patternSum[2]--;
+        gridComponents[i - 1] == 'X' ? patternSum[3]++ : patternSum[3]--;
+        gridComponents[i - 1] == 'X' ? patternSum[7]++ : patternSum[7]--;
         break;
       case 8:
-        gridComponents[i - 1] == 'X'
-            ? patternSum[2]++
-            : patternSum[2]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[4]++
-            : patternSum[4]--;
+        gridComponents[i - 1] == 'X' ? patternSum[2]++ : patternSum[2]--;
+        gridComponents[i - 1] == 'X' ? patternSum[4]++ : patternSum[4]--;
         break;
       case 9:
-        gridComponents[i - 1] == 'X'
-            ? patternSum[2]++
-            : patternSum[2]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[5]++
-            : patternSum[5]--;
-        gridComponents[i - 1] == 'X'
-            ? patternSum[6]++
-            : patternSum[6]--;
+        gridComponents[i - 1] == 'X' ? patternSum[2]++ : patternSum[2]--;
+        gridComponents[i - 1] == 'X' ? patternSum[5]++ : patternSum[5]--;
+        gridComponents[i - 1] == 'X' ? patternSum[6]++ : patternSum[6]--;
         break;
     }
 
@@ -415,7 +403,7 @@ class _TTTState extends State<TTT> {
 
   showResetAndHomepageDialog(BuildContext context, bool type) {
     //if is false that means reset button was pressed, otherwise homepage button was pressed
-    String alertTitle = "AlertDialog";
+    String alertTitle = "Alert Dialog";
     String alertContent;
     String continueButtonText;
     if (type) {
@@ -423,7 +411,7 @@ class _TTTState extends State<TTT> {
       continueButtonText = "Reset";
     } else {
       alertContent =
-          "You sure you want to leave the game?\nAny progress made will be lost";
+          "You sure you want to leave the game?";
       continueButtonText = "Quit";
     }
 
@@ -438,7 +426,7 @@ class _TTTState extends State<TTT> {
       child: Text(continueButtonText),
       onPressed: () {
         if (type) {
-          reset();
+          scoreReset();
           Navigator.of(context).pop();
         } else {
           Navigator.of(context).pop();

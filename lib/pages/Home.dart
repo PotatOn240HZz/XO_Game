@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:untitled/pages/TTT.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Home extends StatefulWidget {
@@ -30,7 +29,6 @@ class _HomeState extends State<Home> {
         drawer: Drawer(
           child: SafeArea(
             child: ListView(
-              padding: EdgeInsets.zero,
               children: [
                 ListTile(
                   horizontalTitleGap: 0,
@@ -49,26 +47,59 @@ class _HomeState extends State<Home> {
             ),
           ),
         ),
-        body: Column(
-          children: [
-            const Text(''),
-            ElevatedButton(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                        side: const BorderSide(color: Colors.grey))),
-                backgroundColor: MaterialStateProperty.all(Colors.grey),
-                textStyle: MaterialStateProperty.all(
-                  const TextStyle(fontSize: 30),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset('assets/images/XO.png', width: 130),
+              const SizedBox(height: 70),
+              ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                  )),
+                  backgroundColor: MaterialStateProperty.all(Colors.blue),
+                  textStyle: MaterialStateProperty.all(
+                    const TextStyle(fontSize: 30),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pushNamed(
+                    '/TTT',
+                    arguments: {'isAI': true},
+                  );
+                },
+                child: const Text(
+                  "Two Players\nGame",
+                  textAlign: TextAlign.center,
                 ),
               ),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/TTT');
-              },
-              child: const Text("Press me"),
-            ),
-          ],
+              const SizedBox(height: 20),
+              ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                  )),
+                  backgroundColor: MaterialStateProperty.all(Colors.blue),
+                  textStyle: MaterialStateProperty.all(
+                    const TextStyle(fontSize: 30),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pushNamed(
+                    '/TTT',
+                    arguments: {'isAI': false},
+                  );
+                },
+                child: const Text(
+                  "Single Player\nGame",
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
