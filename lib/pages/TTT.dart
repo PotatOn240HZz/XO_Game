@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TTT extends StatefulWidget {
-  const TTT({Key? key,required this.isAI}) : super(key: key);
+  const TTT({Key? key, required this.isAI}) : super(key: key);
 
   final bool isAI;
 
@@ -13,11 +13,30 @@ class TTT extends StatefulWidget {
 class _TTTState extends State<TTT> {
   List<String> gridComponents = List.filled(9, '');
   List<Color> gridColour = List.filled(9, Colors.white);
+  bool isDifficult = true;
   bool isXTurn = true;
+  bool pauseGrid = false;
+  int currentOccupied = 0;
   int xWins = 0;
   int oWins = 0;
-  bool someoneWon = false;
-  String tttButton = "it's X turn!";
+  String tttButton = "";
+
+  @override
+  // ignore: curly_braces_in_flow_control_structures
+  void initState() {
+    super.initState();
+    tttButton = "Hard difficulty";
+    if (widget.isAI) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) async {
+          await setDifficulty(context);
+          setState(() {});
+        },
+      );
+    } else {
+      tttButton = "it's X turn!";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +44,7 @@ class _TTTState extends State<TTT> {
       onWillPop: () => showResetAndHomepageDialog(context, false),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Tic Tac Toe Game'),
+          title: const Text('Tic Tac Toe Game '),
           backgroundColor: Colors.black,
           actions: [
             IconButton(
@@ -49,6 +68,17 @@ class _TTTState extends State<TTT> {
                     showResetAndHomepageDialog(context, false),
                   },
                 ),
+                widget.isAI
+                    ? ListTile(
+                        horizontalTitleGap: 0,
+                        title: const Text('Change Difficulty'),
+                        onTap: () async {
+                          Navigator.of(context).pop();
+                          await setDifficulty(context);
+                          setState(() {});
+                        },
+                      )
+                    : const SizedBox(),
                 ListTile(
                   horizontalTitleGap: 0,
                   title: const Text('Reset Score'),
@@ -89,16 +119,27 @@ class _TTTState extends State<TTT> {
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          if (gridComponents[index] == '' && !someoneWon) {
+                          if (gridComponents[index] == '' && !pauseGrid) {
+                            currentOccupied++;
                             gridComponents[index] = isXTurn ? 'X' : 'O';
                             isXTurn = !isXTurn;
-                            if (isXTurn) {
+                            if (checkWinner(index + 1) ||
+                                currentOccupied == 9) {
+                              tttButton = "Play Again";
+                              if (currentOccupied == 9) {
+                                showDrawDialog(context);
+                                pauseGrid = true;
+                              }
+                            } else if (widget.isAI) {
+                              if (isDifficult) {
+                                tttButton = "Hard difficulty";
+                              } else {
+                                tttButton = "Easy difficulty";
+                              }
+                            } else if (isXTurn) {
                               tttButton = "it's X turn!";
                             } else {
                               tttButton = "it's O turn!";
-                            }
-                            if (checkWinner(index + 1)) {
-                              tttButton = "Play Again";
                             }
                           }
                         });
@@ -136,7 +177,7 @@ class _TTTState extends State<TTT> {
                   ),
                 ),
                 onPressed: () {
-                  if (someoneWon) {
+                  if (pauseGrid) {
                     reset();
                   }
                 },
@@ -176,6 +217,59 @@ class _TTTState extends State<TTT> {
     );
   }
 
+  Future setDifficulty(BuildContext context) {
+    // set up the AlertDialog
+    // set up the button
+    Widget okButton = TextButton(
+      child: const Text("OK"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+
+    // show the dialog
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: const Text("Choose the AI difficulty:"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<bool>(
+                  title: const Text('Hard'),
+                  value: true,
+                  groupValue: isDifficult,
+                  onChanged: (value) {
+                    setState(() {
+                      tttButton = "Hard difficulty";
+                      isDifficult = value as bool;
+                    });
+                  },
+                ),
+                RadioListTile<bool>(
+                  title: const Text('Easy'),
+                  value: false,
+                  groupValue: isDifficult,
+                  onChanged: (value) {
+                    setState(() {
+                      tttButton = "Easy difficulty";
+                      isDifficult = value as bool;
+                    });
+                  },
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              okButton,
+            ],
+          );
+        });
+      },
+    );
+  }
+
   void scoreReset() {
     setState(() {
       xWins = 0;
@@ -187,8 +281,17 @@ class _TTTState extends State<TTT> {
   void reset() {
     setState(() {
       isXTurn = true;
-      someoneWon = false;
-      tttButton = "it's X turn!";
+      pauseGrid = false;
+      currentOccupied = 0;
+      if (widget.isAI) {
+        if (isDifficult) {
+          tttButton = "Hard difficulty";
+        } else {
+          tttButton = "Easy difficulty";
+        }
+      } else {
+        tttButton = "it's X turn!";
+      }
       for (int i = 0; i < 9; i++) {
         gridComponents[i] = '';
         gridColour[i] = Colors.white;
@@ -287,7 +390,7 @@ class _TTTState extends State<TTT> {
   }
 
   bool applyWinner(int numberOfSymbol, int line) {
-    someoneWon = true;
+    pauseGrid = true;
     if (numberOfSymbol == 3) {
       xWins++;
       showWinningDialog(context, true);
@@ -364,6 +467,32 @@ class _TTTState extends State<TTT> {
     }
   }
 
+  showDrawDialog(BuildContext context) {
+    // set up the button
+    Widget okButton = TextButton(
+      child: const Text("OK"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: const Text("Draw!"),
+      content: const Text("No score has been changed"),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   showWinningDialog(BuildContext context, bool didXWin) {
     // set up the AlertDialog
     String alertTitle;
@@ -410,8 +539,7 @@ class _TTTState extends State<TTT> {
       alertContent = "You sure you want to reset the game?";
       continueButtonText = "Reset";
     } else {
-      alertContent =
-          "You sure you want to leave the game?";
+      alertContent = "You sure you want to leave the game?";
       continueButtonText = "Quit";
     }
 

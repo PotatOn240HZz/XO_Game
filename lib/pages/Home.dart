@@ -67,7 +67,7 @@ class _HomeState extends State<Home> {
                 onPressed: () {
                   Navigator.of(context).pushNamed(
                     '/TTT',
-                    arguments: {'isAI': true},
+                    arguments: {'isAI': false},
                   );
                 },
                 child: const Text(
@@ -90,7 +90,7 @@ class _HomeState extends State<Home> {
                 onPressed: () {
                   Navigator.of(context).pushNamed(
                     '/TTT',
-                    arguments: {'isAI': false},
+                    arguments: {'isAI': true},
                   );
                 },
                 child: const Text(
