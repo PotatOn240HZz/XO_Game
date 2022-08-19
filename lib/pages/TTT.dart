@@ -122,24 +122,25 @@ class _TTTState extends State<TTT> {
                           if (gridComponents[index] == '' && !pauseGrid) {
                             currentOccupied++;
                             gridComponents[index] = isXTurn ? 'X' : 'O';
-                            isXTurn = !isXTurn;
-                            if (checkWinner(index + 1) ||
-                                currentOccupied == 9) {
+                            //change turns string
+                            if (!widget.isAI) {
+                              isXTurn = !isXTurn;
+                              if (isXTurn) {
+                                tttButton = "it's X turn!";
+                              } else {
+                                tttButton = "it's O turn!";
+                              }
+                            }
+                            //check winner if AI or not
+                            if (checkWinner() || currentOccupied == 9) {
                               tttButton = "Play Again";
                               if (currentOccupied == 9) {
                                 showDrawDialog(context);
                                 pauseGrid = true;
                               }
-                            } else if (widget.isAI) {
-                              if (isDifficult) {
-                                tttButton = "Hard difficulty";
-                              } else {
-                                tttButton = "Easy difficulty";
-                              }
-                            } else if (isXTurn) {
-                              tttButton = "it's X turn!";
-                            } else {
-                              tttButton = "it's O turn!";
+                            }
+                            else if(widget.isAI){
+                              aiAlgo();
                             }
                           }
                         });
@@ -217,6 +218,234 @@ class _TTTState extends State<TTT> {
     );
   }
 
+  void scoreReset() {
+    setState(() {
+      xWins = 0;
+      oWins = 0;
+    });
+    reset();
+  }
+
+  void reset() {
+    setState(() {
+      isXTurn = true;
+      pauseGrid = false;
+      currentOccupied = 0;
+      if (widget.isAI) {
+        if (isDifficult) {
+          tttButton = "Hard difficulty";
+        } else {
+          tttButton = "Easy difficulty";
+        }
+      } else {
+        tttButton = "it's X turn!";
+      }
+      for (int i = 0; i < 9; i++) {
+        gridComponents[i] = '';
+        gridColour[i] = Colors.white;
+        if (i != 8) {
+          patternSum[i] = 0;
+        }
+      }
+    });
+  }
+
+  //1st winning pattern will be the 1st row
+  //2nd winning pattern will be the 2st row
+  //3rd winning pattern will be the 3st row
+  //4th winning pattern will be the 1st column
+  //5th winning pattern will be the 2st column
+  //6th winning pattern will be the 3st column
+  //7th winning pattern will be the diagonal
+  //8th winning pattern will be the diagonal
+
+  void aiAlgo() {
+    currentOccupied++;
+    int max = patternSum[0], line = 0;
+    for (int i = 1; i < 8; i++) {
+      if (patternSum[i] > max) {
+        max = patternSum[i];
+        line = i;
+      }
+    }
+    checkGridLine(line+1);
+    if (checkWinner() || currentOccupied == 9) {
+      tttButton = "Play Again";
+      if (currentOccupied == 9) {
+        showDrawDialog(context);
+        pauseGrid = true;
+      }
+    }
+  }
+
+
+  List<int> patternSum = List.filled(8, 0);
+
+  bool checkWinner() {
+    //ADD ALL
+    patternSum = List.filled(8, 0);
+    for (int i = 0; i < 9; i++) {
+      if (gridComponents[i] != '') {
+        switch (i) {
+          case 0:
+            gridComponents[i] == 'X'
+                ? {patternSum[0]++, patternSum[3]++, patternSum[6]++}
+                : {patternSum[0]--, patternSum[3]--, patternSum[6]--};
+            break;
+          case 1:
+            gridComponents[i] == 'X'
+                ? {patternSum[0]++, patternSum[4]++}
+                : {patternSum[0]--, patternSum[4]--};
+            break;
+          case 2:
+            gridComponents[i] == 'X'
+                ? {patternSum[0]++, patternSum[5]++, patternSum[7]++}
+                : {patternSum[0]--, patternSum[5]--, patternSum[7]--};
+            break;
+          case 3:
+            gridComponents[i] == 'X'
+                ? {patternSum[1]++, patternSum[3]++}
+                : {patternSum[1]--, patternSum[3]--};
+            break;
+          case 4:
+            gridComponents[i] == 'X'
+                ? {
+                    patternSum[1]++,
+                    patternSum[4]++,
+                    patternSum[6]++,
+                    patternSum[7]++
+                  }
+                : {
+                    patternSum[1]--,
+                    patternSum[4]--,
+                    patternSum[6]--,
+                    patternSum[7]--
+                  };
+            break;
+          case 5:
+            gridComponents[i] == 'X'
+                ? {patternSum[1]++, patternSum[5]++}
+                : {patternSum[1]--, patternSum[5]--};
+            break;
+          case 6:
+            gridComponents[i] == 'X'
+                ? {patternSum[2]++, patternSum[3]++, patternSum[7]++}
+                : {patternSum[2]--, patternSum[3]--, patternSum[7]--};
+            break;
+          case 7:
+            gridComponents[i] == 'X'
+                ? {patternSum[2]++, patternSum[4]++}
+                : {patternSum[2]--, patternSum[4]--};
+            break;
+          case 8:
+            gridComponents[i] == 'X'
+                ? {patternSum[2]++, patternSum[5]++, patternSum[6]++}
+                : {patternSum[2]--, patternSum[5]--, patternSum[6]--};
+            break;
+        }
+      }
+    }
+
+    //CHECK ROW
+    if (patternSum[0] == 3 || patternSum[0] == -3) {
+      return applyWinner(patternSum[0], 1);
+    } else if (patternSum[1] == 3 || patternSum[1] == -3) {
+      return applyWinner(patternSum[1], 2);
+    } else if (patternSum[2] == 3 || patternSum[2] == -3) {
+      return applyWinner(patternSum[2], 3);
+    }
+    //CHECK COLUMN
+    else if (patternSum[3] == 3 || patternSum[3] == -3) {
+      return applyWinner(patternSum[3], 4);
+    } else if (patternSum[4] == 3 || patternSum[4] == -3) {
+      return applyWinner(patternSum[4], 5);
+    } else if (patternSum[5] == 3 || patternSum[5] == -3) {
+      return applyWinner(patternSum[5], 6);
+    }
+    //CHECK Diagonal`
+    else if (patternSum[6] == 3 || patternSum[6] == -3) {
+      return applyWinner(patternSum[6], 7);
+    }
+    //CHECK ReverseDiagonal
+    else if (patternSum[7] == 3 || patternSum[7] == -3) {
+      return applyWinner(patternSum[7], 8);
+    }
+    //NONE WON YET
+    return false;
+  }
+
+  bool applyWinner(int numberOfSymbol, int line) {
+    pauseGrid = true;
+    if (numberOfSymbol == 3) {
+      xWins++;
+      showWinningDialog(context, true);
+    } else {
+      oWins++;
+      showWinningDialog(context, false);
+    }
+    checkGridLine(line);
+    //CHANGE THE COLOUR OF THE WINNER
+
+    return true;
+  }
+
+  void checkGridLine(int line) {
+    switch (line) {
+      case 1:
+      case 2:
+      case 3:
+        for (int i = (line * 3) - 3; i < line * 3; i++) {
+          if (pauseGrid) {
+            gridColour[i] = Colors.red;
+          } else {
+            if (gridComponents[i] == '') {
+              gridComponents[i] = 'O';
+              i=9;
+            }
+          }
+        }
+        break;
+      case 4:
+      case 5:
+      case 6:
+        for (int i = line - 4; i < 9; i += 3) {
+          if (pauseGrid) {
+            gridColour[i] = Colors.red;
+          } else {
+            if (gridComponents[i] == '') {
+              gridComponents[i] = 'O';
+              i=9;
+            }
+          }
+        }
+        break;
+      case 7:
+        for (int i = 0; i < 9; i += 4) {
+          if (pauseGrid) {
+            gridColour[i] = Colors.red;
+          } else {
+            if (gridComponents[i] == '') {
+              gridComponents[i] = 'O';
+              i=9;
+            }
+          }
+        }
+        break;
+      case 8:
+        for (int i = 2; i < 7; i += 2) {
+          if (pauseGrid) {
+            gridColour[i] = Colors.red;
+          } else {
+            if (gridComponents[i] == '') {
+              gridComponents[i] = 'O';
+              i=9;
+            }
+          }
+        }
+        break;
+    }
+  }
+
   Future setDifficulty(BuildContext context) {
     // set up the AlertDialog
     // set up the button
@@ -224,10 +453,10 @@ class _TTTState extends State<TTT> {
       child: const Text("OK"),
       onPressed: () {
         Navigator.of(context).pop();
+        scoreReset();
       },
     );
 
-    // show the dialog
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -270,165 +499,6 @@ class _TTTState extends State<TTT> {
     );
   }
 
-  void scoreReset() {
-    setState(() {
-      xWins = 0;
-      oWins = 0;
-    });
-    reset();
-  }
-
-  void reset() {
-    setState(() {
-      isXTurn = true;
-      pauseGrid = false;
-      currentOccupied = 0;
-      if (widget.isAI) {
-        if (isDifficult) {
-          tttButton = "Hard difficulty";
-        } else {
-          tttButton = "Easy difficulty";
-        }
-      } else {
-        tttButton = "it's X turn!";
-      }
-      for (int i = 0; i < 9; i++) {
-        gridComponents[i] = '';
-        gridColour[i] = Colors.white;
-        if (i != 8) {
-          patternSum[i] = 0;
-        }
-      }
-    });
-  }
-
-  //1st winning pattern will be the 1st row
-  //2nd winning pattern will be the 2st row
-  //3rd winning pattern will be the 3st row
-  //4th winning pattern will be the 1st column
-  //5th winning pattern will be the 2st column
-  //6th winning pattern will be the 3st column
-  //7th winning pattern will be the diagonal
-  //8th winning pattern will be the diagonal
-
-  List<int> patternSum = List.filled(8, 0);
-
-  bool checkWinner(int i) {
-    //ADD ALL
-    switch (i) {
-      case 1:
-        gridComponents[i - 1] == 'X' ? patternSum[0]++ : patternSum[0]--;
-        gridComponents[i - 1] == 'X' ? patternSum[3]++ : patternSum[3]--;
-        gridComponents[i - 1] == 'X' ? patternSum[6]++ : patternSum[6]--;
-        break;
-      case 2:
-        gridComponents[i - 1] == 'X' ? patternSum[0]++ : patternSum[0]--;
-        gridComponents[i - 1] == 'X' ? patternSum[4]++ : patternSum[4]--;
-        break;
-      case 3:
-        gridComponents[i - 1] == 'X' ? patternSum[0]++ : patternSum[0]--;
-        gridComponents[i - 1] == 'X' ? patternSum[5]++ : patternSum[5]--;
-        gridComponents[i - 1] == 'X' ? patternSum[7]++ : patternSum[7]--;
-        break;
-      case 4:
-        gridComponents[i - 1] == 'X' ? patternSum[1]++ : patternSum[1]--;
-        gridComponents[i - 1] == 'X' ? patternSum[3]++ : patternSum[3]--;
-        break;
-      case 5:
-        gridComponents[i - 1] == 'X' ? patternSum[1]++ : patternSum[1]--;
-        gridComponents[i - 1] == 'X' ? patternSum[4]++ : patternSum[4]--;
-        gridComponents[i - 1] == 'X' ? patternSum[6]++ : patternSum[6]--;
-        gridComponents[i - 1] == 'X' ? patternSum[7]++ : patternSum[7]--;
-        break;
-      case 6:
-        gridComponents[i - 1] == 'X' ? patternSum[1]++ : patternSum[1]--;
-        gridComponents[i - 1] == 'X' ? patternSum[5]++ : patternSum[5]--;
-        break;
-      case 7:
-        gridComponents[i - 1] == 'X' ? patternSum[2]++ : patternSum[2]--;
-        gridComponents[i - 1] == 'X' ? patternSum[3]++ : patternSum[3]--;
-        gridComponents[i - 1] == 'X' ? patternSum[7]++ : patternSum[7]--;
-        break;
-      case 8:
-        gridComponents[i - 1] == 'X' ? patternSum[2]++ : patternSum[2]--;
-        gridComponents[i - 1] == 'X' ? patternSum[4]++ : patternSum[4]--;
-        break;
-      case 9:
-        gridComponents[i - 1] == 'X' ? patternSum[2]++ : patternSum[2]--;
-        gridComponents[i - 1] == 'X' ? patternSum[5]++ : patternSum[5]--;
-        gridComponents[i - 1] == 'X' ? patternSum[6]++ : patternSum[6]--;
-        break;
-    }
-
-    //CHECK ALL
-    //CHECK ROW
-    if (patternSum[0] == 3 || patternSum[0] == -3) {
-      return applyWinner(patternSum[0], 1);
-    } else if (patternSum[1] == 3 || patternSum[1] == -3) {
-      return applyWinner(patternSum[1], 2);
-    } else if (patternSum[2] == 3 || patternSum[2] == -3) {
-      return applyWinner(patternSum[2], 3);
-    }
-    //CHECK COLUMN
-    else if (patternSum[3] == 3 || patternSum[3] == -3) {
-      return applyWinner(patternSum[3], 4);
-    } else if (patternSum[4] == 3 || patternSum[4] == -3) {
-      return applyWinner(patternSum[4], 5);
-    } else if (patternSum[5] == 3 || patternSum[5] == -3) {
-      return applyWinner(patternSum[5], 6);
-    }
-    //CHECK Diagonal`
-    else if (patternSum[6] == 3 || patternSum[6] == -3) {
-      return applyWinner(patternSum[6], 7);
-    }
-    //CHECK ReverseDiagonal
-    else if (patternSum[7] == 3 || patternSum[7] == -3) {
-      return applyWinner(patternSum[7], 8);
-    }
-    //NONE WON YET
-    return false;
-  }
-
-  bool applyWinner(int numberOfSymbol, int line) {
-    pauseGrid = true;
-    if (numberOfSymbol == 3) {
-      xWins++;
-      showWinningDialog(context, true);
-    } else {
-      oWins++;
-      showWinningDialog(context, false);
-    }
-
-    //CHANGE THE COLOUR OF THE WINNER
-    switch (line) {
-      case 1:
-      case 2:
-      case 3:
-        for (int i = (line * 3) - 3; i < line * 3; i++) {
-          gridColour[i] = Colors.red;
-        }
-        break;
-      case 4:
-      case 5:
-      case 6:
-        for (int i = line - 4; i < 9; i += 3) {
-          gridColour[i] = Colors.red;
-        }
-        break;
-      case 7:
-        for (int i = 0; i < 9; i += 4) {
-          gridColour[i] = Colors.red;
-        }
-        break;
-      case 8:
-        for (int i = 2; i < 7; i += 2) {
-          gridColour[i] = Colors.red;
-        }
-        break;
-    }
-    return true;
-  }
-
   Border _determineBorder(int index) {
     BorderSide borderSide = const BorderSide(
       color: Colors.grey,
@@ -468,7 +538,6 @@ class _TTTState extends State<TTT> {
   }
 
   showDrawDialog(BuildContext context) {
-    // set up the button
     Widget okButton = TextButton(
       child: const Text("OK"),
       onPressed: () {
@@ -484,7 +553,6 @@ class _TTTState extends State<TTT> {
       ],
     );
 
-    // show the dialog
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -521,7 +589,6 @@ class _TTTState extends State<TTT> {
       ],
     );
 
-    // show the dialog
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -563,8 +630,6 @@ class _TTTState extends State<TTT> {
       },
     );
 
-    // set up the AlertDialog
-
     AlertDialog alert = AlertDialog(
       title: Text(alertTitle),
       content: Text(alertContent),
@@ -574,7 +639,6 @@ class _TTTState extends State<TTT> {
       ],
     );
 
-    // show the dialog
     showDialog(
       context: context,
       builder: (BuildContext context) {
