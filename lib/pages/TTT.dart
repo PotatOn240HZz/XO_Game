@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -138,9 +140,15 @@ class _TTTState extends State<TTT> {
                                 showDrawDialog(context);
                                 pauseGrid = true;
                               }
-                            }
-                            else if(widget.isAI){
+                            } else if (widget.isAI) {
                               aiAlgo();
+                              if (checkWinner() || currentOccupied == 9) {
+                                tttButton = "Play Again";
+                                if (currentOccupied == 9) {
+                                  showDrawDialog(context);
+                                  pauseGrid = true;
+                                }
+                              }
                             }
                           }
                         });
@@ -235,7 +243,7 @@ class _TTTState extends State<TTT> {
         if (isDifficult) {
           tttButton = "Hard difficulty";
         } else {
-          tttButton = "Easy difficulty";
+          tttButton = "Medium difficulty";
         }
       } else {
         tttButton = "it's X turn!";
@@ -261,23 +269,28 @@ class _TTTState extends State<TTT> {
 
   void aiAlgo() {
     currentOccupied++;
-    int max = patternSum[0], line = 0;
-    for (int i = 1; i < 8; i++) {
-      if (patternSum[i] > max) {
-        max = patternSum[i];
-        line = i;
+    //create HashMap
+    LinkedHashMap<int, int> sortedPatternSum = LinkedHashMap();
+    for (int i = 0; i < 8; i++) {
+      if(isDifficult && patternSum[i]<0) {
+        sortedPatternSum[i] = (patternSum[i].abs())*2;
+      } else {
+        sortedPatternSum[i] = patternSum[i];
       }
     }
-    checkGridLine(line+1);
-    if (checkWinner() || currentOccupied == 9) {
-      tttButton = "Play Again";
-      if (currentOccupied == 9) {
-        showDrawDialog(context);
-        pauseGrid = true;
+    //sort HashMap
+    var sortedKeys = sortedPatternSum.keys.toList(growable: false)
+      ..sort(
+          (k1, k2) => sortedPatternSum[k2]!.compareTo(sortedPatternSum[k1]!));
+    sortedPatternSum = LinkedHashMap.fromIterable(sortedKeys,
+        key: (k) => k, value: (k) => sortedPatternSum[k]!);
+    //pass highest possibility to attack(hard)/defend(hard&medium)
+    for (int i in sortedPatternSum.keys) {
+      if (checkGridLine(i + 1)) {
+        break;
       }
     }
   }
-
 
   List<int> patternSum = List.filled(8, 0);
 
@@ -389,7 +402,7 @@ class _TTTState extends State<TTT> {
     return true;
   }
 
-  void checkGridLine(int line) {
+  bool checkGridLine(int line) {
     switch (line) {
       case 1:
       case 2:
@@ -400,7 +413,8 @@ class _TTTState extends State<TTT> {
           } else {
             if (gridComponents[i] == '') {
               gridComponents[i] = 'O';
-              i=9;
+              i = 9;
+              return true;
             }
           }
         }
@@ -414,7 +428,8 @@ class _TTTState extends State<TTT> {
           } else {
             if (gridComponents[i] == '') {
               gridComponents[i] = 'O';
-              i=9;
+              i = 9;
+              return true;
             }
           }
         }
@@ -426,7 +441,8 @@ class _TTTState extends State<TTT> {
           } else {
             if (gridComponents[i] == '') {
               gridComponents[i] = 'O';
-              i=9;
+              i = 9;
+              return true;
             }
           }
         }
@@ -438,12 +454,14 @@ class _TTTState extends State<TTT> {
           } else {
             if (gridComponents[i] == '') {
               gridComponents[i] = 'O';
-              i=9;
+              i = 9;
+              return true;
             }
           }
         }
         break;
     }
+    return false;
   }
 
   Future setDifficulty(BuildContext context) {
@@ -478,12 +496,12 @@ class _TTTState extends State<TTT> {
                   },
                 ),
                 RadioListTile<bool>(
-                  title: const Text('Easy'),
+                  title: const Text('Medium'),
                   value: false,
                   groupValue: isDifficult,
                   onChanged: (value) {
                     setState(() {
-                      tttButton = "Easy difficulty";
+                      tttButton = "Medium difficulty";
                       isDifficult = value as bool;
                     });
                   },
