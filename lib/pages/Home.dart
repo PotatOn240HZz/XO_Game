@@ -10,13 +10,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<String> gridComponents = List.filled(9, '');
-  List<Color> gridColour = List.filled(9, Colors.white);
-  bool isXTurn = true;
-  int xWins = 0;
-  int oWins = 0;
-  bool someoneWon = false;
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -28,8 +21,13 @@ class _HomeState extends State<Home> {
         ),
         drawer: Drawer(
           child: SafeArea(
-            child: ListView(
+            child: Column(
               children: [
+                const Expanded(child: SizedBox()),
+                const Divider(
+                  thickness: 2,
+                  color: Colors.black38,
+                ),
                 ListTile(
                   horizontalTitleGap: 0,
                   leading: Image.asset('assets/images/Github.png', width: 30),
@@ -47,60 +45,56 @@ class _HomeState extends State<Home> {
             ),
           ),
         ),
+        backgroundColor: Colors.blue,
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset('assets/images/XO.png', width: 130),
-              const SizedBox(height: 70),
-              ElevatedButton(
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                  )),
-                  backgroundColor: MaterialStateProperty.all(Colors.blue),
-                  textStyle: MaterialStateProperty.all(
-                    const TextStyle(fontSize: 30),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pushNamed(
-                    '/TTT',
-                    arguments: {'isAI': false},
-                  );
-                },
-                child: const Text(
-                  "Two Players\nGame",
-                  textAlign: TextAlign.center,
-                ),
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/XO.png', width: 130),
+            const SizedBox(height: 70),
+            ElevatedButton(
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0),
+                )),
+                backgroundColor: MaterialStateProperty.all(Colors.white),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                  )),
-                  backgroundColor: MaterialStateProperty.all(Colors.blue),
-                  textStyle: MaterialStateProperty.all(
-                    const TextStyle(fontSize: 30),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pushNamed(
-                    '/TTT',
-                    arguments: {'isAI': true},
-                  );
-                },
-                child: const Text(
-                  "Single Player\nGame",
-                  textAlign: TextAlign.center,
-                ),
+              onPressed: () {
+                Navigator.of(context).pushNamed(
+                  '/TTT',
+                  arguments: {'isAI': false},
+                );
+              },
+              child: const Text(
+                "Two Players\nGame",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 30, color: Colors.blue),
               ),
-            ],
-          ),
-        ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0),
+                )),
+                backgroundColor: MaterialStateProperty.all(Colors.white),
+              ),
+              onPressed: () {
+                Navigator.of(context).pushNamed(
+                  '/TTT',
+                  arguments: {'isAI': true},
+                );
+              },
+              child: const Text(
+                "Single Player\nGame",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 30, color: Colors.blue),
+              ),
+            ),
+          ],
+        )),
       ),
     );
   }

@@ -59,11 +59,11 @@ class _TTTState extends State<TTT> {
         ),
         drawer: Drawer(
           child: SafeArea(
-            child: ListView(
-              padding: EdgeInsets.zero,
+            child: Column(
               children: [
                 ListTile(
-                  horizontalTitleGap: 0,
+                  horizontalTitleGap: -5,
+                  leading: const Icon(Icons.home),
                   title: const Text('Get Back To Home Screen'),
                   onTap: () => {
                     Navigator.of(context).pop(),
@@ -72,7 +72,8 @@ class _TTTState extends State<TTT> {
                 ),
                 widget.isAI
                     ? ListTile(
-                        horizontalTitleGap: 0,
+                        horizontalTitleGap: -5,
+                        leading: const Icon(Icons.speed_outlined),
                         title: const Text('Change Difficulty'),
                         onTap: () async {
                           Navigator.of(context).pop();
@@ -83,11 +84,17 @@ class _TTTState extends State<TTT> {
                     : const SizedBox(),
                 ListTile(
                   horizontalTitleGap: 0,
+                  leading: const Icon(Icons.restart_alt),
                   title: const Text('Reset Score'),
                   onTap: () => {
                     Navigator.of(context).pop(),
                     showResetAndHomepageDialog(context, true),
                   },
+                ),
+                const Expanded(child: SizedBox()),
+                const Divider(
+                  thickness: 2,
+                  color: Colors.black38,
                 ),
                 ListTile(
                   horizontalTitleGap: 0,
@@ -124,7 +131,6 @@ class _TTTState extends State<TTT> {
                           if (gridComponents[index] == '' && !pauseGrid) {
                             currentOccupied++;
                             gridComponents[index] = isXTurn ? 'X' : 'O';
-                            //change turns string
                             if (!widget.isAI) {
                               isXTurn = !isXTurn;
                               if (isXTurn) {
@@ -134,13 +140,14 @@ class _TTTState extends State<TTT> {
                               }
                             }
                             //check winner if AI or not
-                            if (checkWinner() || currentOccupied == 9) {
+                            if (checkWinner()) {
                               tttButton = "Play Again";
-                              if (currentOccupied == 9) {
-                                showDrawDialog(context);
-                                pauseGrid = true;
-                              }
+                            } else if (currentOccupied == 9) {
+                              showDrawDialog(context);
+                              pauseGrid = true;
+                              tttButton = "Play Again";
                             } else if (widget.isAI) {
+                              print("xd");
                               aiAlgo();
                               if (checkWinner() || currentOccupied == 9) {
                                 tttButton = "Play Again";
@@ -272,7 +279,7 @@ class _TTTState extends State<TTT> {
     //create HashMap
     LinkedHashMap<int, int> sortedPatternSum = LinkedHashMap();
     for (int i = 0; i < 8; i++) {
-      if(isDifficult && patternSum[i]<0) {
+      if (isDifficult && patternSum[i] < 0) {
         sortedPatternSum[i] = (patternSum[i].abs())*2;
       } else {
         sortedPatternSum[i] = patternSum[i];
