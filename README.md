@@ -1,16 +1,13 @@
-# untitled
+# XO Game
 
-A new Flutter project.
+This game was made through my third year studies in the Hashemite University as a personal project.
 
-## Getting Started
+In which, I decided to code an X/O game in flutter, which will contain the following features:
+ - Three main screens(homepage, single and two players)
+ - AI with two difficulties (medium & hard)
+ - Resetting score, and changing difficulty methods
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+Attached you will find the final form of the game:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![preview.png](assets/images/XOGame.gif)

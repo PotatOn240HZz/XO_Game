@@ -265,15 +265,6 @@ class _TTTState extends State<TTT> {
     });
   }
 
-  //1st winning pattern will be the 1st row
-  //2nd winning pattern will be the 2st row
-  //3rd winning pattern will be the 3st row
-  //4th winning pattern will be the 1st column
-  //5th winning pattern will be the 2st column
-  //6th winning pattern will be the 3st column
-  //7th winning pattern will be the diagonal
-  //8th winning pattern will be the diagonal
-
   void aiAlgo() {
     currentOccupied++;
     //create HashMap
@@ -300,6 +291,14 @@ class _TTTState extends State<TTT> {
   }
 
   List<int> patternSum = List.filled(8, 0);
+  //1st index will be the pattern sum of 1st row
+  //2nd index will be the pattern sum of 2st row
+  //3rd index will be the pattern sum of 3st row
+  //4th index will be the pattern sum of 1st column
+  //5th index will be the pattern sum of 2st column
+  //6th index will be the pattern sum of 3st column
+  //7th index will be the pattern sum of diagonal
+  //8th index will be the pattern sum of reverse diagonal
 
   bool checkWinner() {
     //ADD ALL
