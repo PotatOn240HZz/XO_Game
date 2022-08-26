@@ -100,7 +100,7 @@ class _TTTState extends State<TTT> {
                   horizontalTitleGap: 0,
                   leading: Image.asset('assets/images/Github.png', width: 30),
                   title: const Text('GitHub'),
-                  onTap: () => _launchUrl('https://github.com/PotatOn240HZz'),
+                  onTap: () => _launchUrl('https://github.com/joYousefShaban'),
                 ),
                 ListTile(
                   horizontalTitleGap: 0,
